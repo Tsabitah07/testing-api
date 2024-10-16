@@ -25,8 +25,11 @@ class AuthController extends Controller
 
         $user = User::create($data);
 
+        $token = $user->createToken('authToken')->plainTextToken;
+
         return response()->json([
             'message' => 'User berhasil ditambahkan',
+            'token' => $token,
             'data' => $user
         ], 200);
     }
@@ -54,6 +57,14 @@ class AuthController extends Controller
 
     public function user()
     {
+        $auth = auth()->user();
+
+        if ($auth->email_verified_at == null) {
+            return response()->json([
+                'message' => 'Email belum terverifikasi'
+            ], 401);
+        }
+
         return response()->json(auth()->user());
     }
 
