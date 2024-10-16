@@ -27,24 +27,31 @@ class AuthController extends Controller
         ]);
     }
 
-    public function login(LoginRequest $request)
+//    public function login(LoginRequest $request)
+//    {
+//        $credentials = $request->validated();
+//
+//        $user = User::where('email', $request->email)
+//            ->orWhere('username', $request->email)->first();
+//
+//        if ($user &&  Hash::check($credentials['password'], $user->password)) {
+//            $token = $user->createToken('authToken')->plainTextToken;
+//
+//            return view('admin.pages.dashboard',[
+//                'title' => 'Dashboard',
+//                'token' => $token
+//            ]);
+//        } elseif (!$user || !Hash::check($credentials['password'], $user->password)) {
+//            return response()->json([
+//                'error' => 'Email atau Password Salah'
+//            ], 401);
+//        }
+//    }
+
+    public function login()
     {
-        $credentials = $request->validated();
-
-        $user = User::where('email', $request->email)
-            ->orWhere('username', $request->email)->first();
-
-        if ($user &&  Hash::check($credentials['password'], $user->password)) {
-            $token = $user->createToken('authToken')->plainTextToken;
-
-            return view('admin.pages.dashboard',[
-                'title' => 'Dashboard',
-                'token' => $token
-            ]);
-        } elseif (!$user || !Hash::check($credentials['password'], $user->password)) {
-            return response()->json([
-                'error' => 'Email atau Password Salah'
-            ], 401);
-        }
+        return view('admin.pages.dashboard',[
+            'title' => 'Dashboard',
+        ]);
     }
 }

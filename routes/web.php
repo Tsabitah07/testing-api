@@ -21,7 +21,7 @@ Route::get('/', function () {
 
 Route::group(['prefix' => 'admin'], function(){
     Route::get('/login', [AuthController::class, 'loginView'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('login');
+    Route::get('/logins', [AuthController::class, 'login'])->name('login');
 
     Route::get('/dashboard', [DashboardController::class, 'index']);
 });

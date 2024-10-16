@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\api\AuthController;
+use App\Http\Controllers\api\OtpController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +24,11 @@ Route::group(['prefix' => 'auth'], function(){
     Route::post('/register', [AuthController::class, 'register'])->name('register');
     Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::get('/list-user', [AuthController::class, 'show']);
+    Route::post('/send-otp', [OtpController::class, 'sendOtp']);
+    Route::post('/verify-otp', [OtpController::class, 'verifyOtp']);
+
+    Route::post('/verify-token', [OtpController::class, 'verifyToken']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
     Route::group(['middleware' => 'auth:sanctum'], function() {
         Route::get('/data-user', [AuthController::class, 'user']);

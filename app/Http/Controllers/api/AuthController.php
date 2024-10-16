@@ -6,9 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\EditRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\UserRequest;
+use App\Mail\VerifyEmail;
+use App\Models\Otp;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
@@ -109,8 +114,34 @@ class AuthController extends Controller
         }
     }
 
-    public function forgetPassword()
+    public function forgotPassword(Request $request)
     {
+        $email = Cache::get("password-reset-{$request->token}");
 
+        if (! $email || $email !== $request->email) {
+            return response()->json([
+                'message' => 'Invalid or expired token',
+            ], 400);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (! $user) {
+            return response()->json([
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        Cache::forget("password-reset-{$request->token}");
+
+        Otp::where('email', $request->email)->delete();
+
+        return response()->json([
+            'message' => 'Password has been reset successfully',
+        ], 200);
     }
 }
