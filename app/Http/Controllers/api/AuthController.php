@@ -41,6 +41,12 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)
             ->orWhere('username', $request->email)->first();
 
+        if ($user && $user->email_verified_at == null) {
+            return response()->json([
+                'message' => 'Email belum terverifikasi'
+            ], 401);
+        }
+
         if ($user &&  Hash::check($credentials['password'], $user->password)) {
             $token = $user->createToken('authToken')->plainTextToken;
 
