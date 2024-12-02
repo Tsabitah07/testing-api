@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
@@ -30,6 +31,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'User berhasil ditambahkan',
             'token' => $token,
+            'token_expires_at' => now()->addMinutes(config('sanctum.expiration')),
             'data' => $user
         ], 200);
     }
@@ -41,17 +43,12 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)
             ->orWhere('username', $request->email)->first();
 
-        if ($user && $user->email_verified_at == null) {
-            return response()->json([
-                'message' => 'Email belum terverifikasi'
-            ], 401);
-        }
-
         if ($user &&  Hash::check($credentials['password'], $user->password)) {
             $token = $user->createToken('authToken')->plainTextToken;
 
             return response()->json([
                 'token' => $token,
+                'token_expires_at' => now()->addMinutes(config('sanctum.expiration')),
                 'user' => $user,
             ], 200);
         } elseif (!$user || !Hash::check($credentials['password'], $user->password)) {
@@ -61,16 +58,23 @@ class AuthController extends Controller
         }
     }
 
+    public function refreshToken(Request $request)
+    {
+        $user = $request->user();
+        $user->currentAccessToken()->delete();
+
+        $newToken = $user->createToken('authToken')->plainTextToken;
+        $expired_at = $newToken->config('sanctum.expiration');
+
+        return response()->json([
+            'access_token' => $newToken,
+            'token_type' => 'Bearer',
+            'token_expires_at' => $expired_at
+        ]);
+    }
+
     public function user()
     {
-        $auth = auth()->user();
-
-        if ($auth->email_verified_at == null) {
-            return response()->json([
-                'message' => 'Email belum terverifikasi'
-            ], 401);
-        }
-
         return response()->json(auth()->user());
     }
 
@@ -109,6 +113,23 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'User berhasil diupdate',
+            'data' => $user
+        ], 200);
+    }
+
+    public function editCredential(Request $request)
+    {
+        $user = User::find(auth()->user()->id);
+
+        $user->update([
+            'name' => $request->name,
+            'username' => $request->username,
+            'email' => $request->email,
+        ]);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Credential user berhasil diupdate',
             'data' => $user
         ], 200);
     }

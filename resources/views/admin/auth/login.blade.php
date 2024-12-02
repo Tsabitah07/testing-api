@@ -11,11 +11,11 @@
     <div style="width: 30vw; height: 70vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #37B7C3; border-radius: 7px">
         <h3 style="color: white; font-weight: bold; padding: 0; margin: 0 0 20px 0">Welcome to Admin</h3>
         <hr class="my-2"  style="width: 15vw; border: white 1px solid">
-        <form method="get" action="/admin/logins" style="margin-top: 2vh; width: 20vw; text-align: center;" >
+        <form method="post" action="/admin/login" style="margin-top: 2vh; width: 20vw; text-align: center;" >
             @csrf
             <div class="mb-2" style="text-align: left; display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px">
-                <label for="nis" class="form-label" style="color: white; font-weight: bold">Name or Email</label>
-                <input type="text" class="form-control" id="nis" name="nis" placeholder="input name or email" style="padding: 10px 15px">
+                <label for="email" class="form-label" style="color: white; font-weight: bold">Name or Email</label>
+                <input type="text" class="form-control" id="email" name="email" placeholder="input username or email" style="padding: 10px 15px">
             </div>
             <div class="mb-2" style="text-align: left; display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px">
                 <label for="password" class="form-label" style="color: white; font-weight: bold ">Password</label>

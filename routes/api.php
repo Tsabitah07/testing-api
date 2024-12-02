@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\api\AuthController;
+use App\Http\Controllers\API\BookshelfController;
 use App\Http\Controllers\api\OtpController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'auth'], function(){
     Route::post('/register', [AuthController::class, 'register'])->name('register');
     Route::post('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('refresh-token', [AuthController::class, 'refreshToken'])->middleware('auth:sanctum');
     Route::get('/list-user', [AuthController::class, 'show']);
     Route::post('/send-otp', [OtpController::class, 'sendOtp']);
     Route::post('/verify-otp', [OtpController::class, 'verifyOtp']);
@@ -33,9 +35,19 @@ Route::group(['prefix' => 'auth'], function(){
     Route::group(['middleware' => 'auth:sanctum'], function() {
         Route::get('/data-user', [AuthController::class, 'user']);
         Route::post('/edit', [AuthController::class, 'edit']);
+        Route::post('/edit-credential', [AuthController::class, 'editCredential']);
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/delete', [AuthController::class, 'delete']);
 
         Route::post('update-password', [AuthController::class, 'updatePassword']);
+    });
+
+    Route::group(['prefix' => 'bookshelf'], function () {
+        Route::post('/', [BookshelfController::class, 'store']);
+        Route::get('/', [BookshelfController::class, 'index']);
+        Route::put('/', [BookshelfController::class, 'update']);
+        Route::delete('/', [BookshelfController::class, 'destroy']);
+
+        Route::get('/category', [BookshelfController::class, 'category']);
     });
 });

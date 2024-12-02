@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -27,31 +28,47 @@ class AuthController extends Controller
         ]);
     }
 
-//    public function login(LoginRequest $request)
+    public function login(LoginRequest $request)
+    {
+        $credentials = $request->validated();
+
+        $user = User::where('email', $request->email)
+            ->orWhere('username', $request->email)->first();
+
+        if ($user &&  Hash::check($credentials['password'], $user->password)) {
+            $token = $user->createToken('authToken')->plainTextToken;
+
+            if ($user->role == 'admin') {
+                $request->session()->regenerate();
+                return view('admin.pages.dashboard',[
+                    'title' => 'Dashboard',
+                    'token' => $token
+                ]);
+            } elseif ($user->role == 'user') {
+                return view('admin.auth.unauthorized',[
+                    'title' => 'Dashboard',
+                    'token' => $token
+                ]);
+            }
+        } elseif (!$user || !Hash::check($credentials['password'], $user->password)) {
+            return response()->json([
+                'error' => 'Email atau Password Salah'
+            ], 401);
+        }
+    }
+
+//    public function login()
 //    {
-//        $credentials = $request->validated();
-//
-//        $user = User::where('email', $request->email)
-//            ->orWhere('username', $request->email)->first();
-//
-//        if ($user &&  Hash::check($credentials['password'], $user->password)) {
-//            $token = $user->createToken('authToken')->plainTextToken;
-//
-//            return view('admin.pages.dashboard',[
-//                'title' => 'Dashboard',
-//                'token' => $token
-//            ]);
-//        } elseif (!$user || !Hash::check($credentials['password'], $user->password)) {
-//            return response()->json([
-//                'error' => 'Email atau Password Salah'
-//            ], 401);
-//        }
+//        return view('admin.pages.dashboard',[
+//            'title' => 'Dashboard',
+//        ]);
 //    }
 
-    public function login()
+    public function logout(Request $request)
     {
-        return view('admin.pages.dashboard',[
-            'title' => 'Dashboard',
-        ]);
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/admin/login')->with('success', 'Logout successful!');
     }
 }

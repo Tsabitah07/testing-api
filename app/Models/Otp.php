@@ -13,6 +13,7 @@ class Otp extends Model
     protected $fillable = [
         'email',
         'otp',
+        'expired_at',
     ];
 
     protected $dates = [
